@@ -8,25 +8,26 @@ import (
 )
 
 type Request struct {
-	Valor	float64	`json: "valor"`
-	TaxaServico	float64 `json: "taxaServico"`
-	Pessoas	int	`json: "pessoas"`
+	Valor        float64 `json:"valor"`
+	TaxaServico  float64 `json:"taxaServico"`
+	Pessoas      int     `json:"pessoas"`
 }
 
 type Response struct {
-	ValorPorPessoa	float64 `json: "valorPorPessoa"`
+	ValorPorPessoa float64 `json:"valorPorPessoa"`
 }
 
 func calcular(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+
 	var req Request
 
 	json.NewDecoder(r.Body).Decode(&req)
 
 	resultado := conta.CalcularConta(
-		req.valor,
+		req.Valor,
 		req.TaxaServico,
 		req.Pessoas,
 	)
@@ -37,17 +38,17 @@ func calcular(
 
 	w.Header().Set(
 		"Content-Type",
-		"applucation/json",
+		"application/json",
 	)
 
-	json.NewEncoder(w).Encoder(resp)
+	json.NewEncoder(w).Encode(resp)
 }
 
-func main(){
+func main() {
 
 	http.HandleFunc(
 		"/calcular",
-		calculcar,
+		calcular,
 	)
 
 	http.ListenAndServe(
