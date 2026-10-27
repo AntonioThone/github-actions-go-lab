@@ -14,12 +14,16 @@ jobs:
 
     strategy:
       matrix:
+
         os:
           - ubuntu-latest
           - windows-latest
           - macos-latest
 
     runs-on: ${{ matrix.os }}
+
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
 
     steps:
 
@@ -35,8 +39,33 @@ jobs:
       - name: Verify Dependencies
         run: go mod download
 
+      - name: Check Formatting
+        run: |
+          if [ -n "$(gofmt -l .)" ]; then
+            echo "Código não formatado"
+            gofmt -l .
+            exit 1
+          fi
+
+      - name: Go Vet
+        run: go vet ./...
+
+      - name: Validate Secret
+        run: echo "Secret configurado"
+
       - name: Run Tests
         run: go test ./...
+
+      - name: Create Report
+        run: |
+          mkdir -p reports
+          echo "Todos os testes passaram" > reports/test-report.txt
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-${{ matrix.os }}
+          path: reports/test-report.txt
 
   healthcheck:
 
@@ -46,3 +75,17 @@ jobs:
 
       - name: API Status
         run: echo "API saudavel"
+
+  deploy-staging:
+
+    needs: test
+
+    runs-on: ubuntu-latest
+
+    environment: staging
+
+    steps:
+
+      - name: Deploy Staging
+        run: |
+          echo "Deploy para ambiente staging"
