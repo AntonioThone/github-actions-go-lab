@@ -7,5 +7,5 @@ func CalcularConta(
 ) float64 {
 	total := valor + (valor * taxaServico / 100)
 
-	return total / float64(pessoas)
+	return 999
 }
